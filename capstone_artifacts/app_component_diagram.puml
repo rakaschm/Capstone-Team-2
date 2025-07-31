@@ -1,0 +1,13 @@
+@startuml
+' Define components
+component "Frontend\n(Web Browser)" as Frontend
+component "Backend API Server" as Backend
+component "LLM-based Recommendation Engine" as LLM
+database "Database" as DB
+
+' Define relationships
+Frontend -[#blue]-> Backend : HTTPS\n(View tasks,\nCreate tasks)
+Backend -[#green]-> DB : Read/Write
+Backend -[#orange]-> LLM : Get property\nrecommendations
+
+@enduml
