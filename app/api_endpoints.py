@@ -1,3 +1,5 @@
+import json
+import os
 from fastapi import FastAPI, HTTPException, Depends, status
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
@@ -5,6 +7,7 @@ from typing import List
 from datetime import date
 import models_sqlalchemy as models
 import models_pydantic as schemas
+from utils import clean_llm_output, get_completion, setup_llm_client
 
 DATABASE_URL = models.DATABASE_URL
 
@@ -111,6 +114,75 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return
+
+# ---------- Given a User, invoke an LLM to suggest vacation properties ----------
+@app.get("/users/{user_id}/properties", response_model=List[schemas.PropertyResponse])
+def get_user_properties(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    props = db.query(models.Property).all()
+    
+    user_interests = user.interests
+    city_state_list = [
+    {
+        "id": prop.id,
+        "name": prop.name,
+        "city": prop.city,
+        "state": prop.state,
+        "amenities": prop.amenities
+    }
+    for prop in props
+    ]
+
+    print("The user has interests: {}".format(user.interests))
+    print("There are {} properties in the database".format(len(city_state_list)))
+
+    user_recommendations_prompt = f"""
+    You are a travel agent.
+    You will be given a set of user interests as well as a detailed list of vacation property locations.
+    The property locations include the id, name, city, state, and amenities.
+    Recommend a list of properties that align with the user's interests.
+    Base your recommendation on the city of the property and what activities are popular there.
+    Try to spread your recommendations across different interests and locations, and consider all properties in the list.
+    Also, favor unusual destinations that are not too touristy.
+
+    The user's interests are: {user_interests}
+    The list of property locations is: {city_state_list}
+
+    Your response should be the list of property ids in JSON format (a JSON array of integers).
+    Do not include anything else in your response, and do not repeat property ids.
+    Return no more than 5 property ids.
+    """
+    project_root = os.path.abspath(os.path.join(os.getcwd(), '..'))
+    client, model_name, api_provider = setup_llm_client(model_name="gemini-2.5-pro")
+    property_ids = get_completion(user_recommendations_prompt, client, model_name, api_provider, temperature=0.5)
+    print("The LLM returned the following: {}".format(property_ids))
+    property_ids = clean_llm_output(property_ids, "json")
+    property_ids = json.loads(property_ids)
+    property_ids = sorted(set(property_ids))
+
+    print("The LLM recommended the following property ids: {}".format(property_ids))
+
+    responses = []
+    for pid in property_ids:
+        prop = db.query(models.Property).filter(models.Property.id == pid).first()
+        if prop:
+            resp = schemas.PropertyResponse(
+                id=prop.id,
+                name=prop.name,
+                address_line1=prop.address_line1,
+                address_line2=prop.address_line2,
+                city=prop.city,
+                state=prop.state,
+                zip_code=prop.zip_code,
+                country=prop.country,
+                price_per_night=prop.price_per_night,
+                amenities=comma_string_to_list(prop.amenities)
+            )
+            responses.append(resp)
+    return responses
+
 
 # ---------- Property Endpoints ----------
 @app.post("/properties/", response_model=schemas.PropertyResponse, status_code=status.HTTP_201_CREATED)
