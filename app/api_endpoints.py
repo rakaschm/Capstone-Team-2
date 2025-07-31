@@ -8,6 +8,7 @@ from datetime import date
 import models_sqlalchemy as models
 import models_pydantic as schemas
 from utils import clean_llm_output, get_completion, setup_llm_client
+from fastapi.middleware.cors import CORSMiddleware
 
 DATABASE_URL = models.DATABASE_URL
 
@@ -15,6 +16,14 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency to get a DB session
 def get_db():
