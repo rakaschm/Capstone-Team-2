@@ -44,15 +44,28 @@ def comma_string_to_list(s):
         return []
     return [v.strip() for v in s.split(",") if v.strip()]
 
+# Validate e-mail format
+def is_valid_email(email: str) -> bool:
+    import re
+    email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    return re.match(email_regex, email) is not None
+
+# Normalize e-mail addresses
+def normalize_email(email: str) -> str:
+    return email.strip().lower()    
+
 # ---------- User Endpoints ----------
 @app.post("/users/", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    email = normalize_email(user.email)
+    if not is_valid_email(email):
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    db_user = db.query(models.User).filter(models.User.email == email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     db_user = models.User(
         name=user.name,
-        email=user.email,
+        email=email,
         interests=list_to_comma_string(user.interests)
     )
     db.add(db_user)
@@ -103,7 +116,10 @@ def update_user(user_id: int, user_update: schemas.UserUpdate, db: Session = Dep
     if user_update.name is not None:
         user.name = user_update.name
     if user_update.email is not None:
-        user.email = user_update.email
+        email = normalize_email(user_update.email)
+        if not is_valid_email(email):
+            raise HTTPException(status_code=400, detail="Invalid email format")
+        user.email = email
     if user_update.interests is not None:
         user.interests = list_to_comma_string(user_update.interests)
     db.commit()
