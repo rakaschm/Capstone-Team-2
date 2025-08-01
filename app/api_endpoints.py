@@ -164,7 +164,7 @@ def get_user_properties(user_id: int, db: Session = Depends(get_db)):
     Return no more than 5 property ids.
     """
     project_root = os.path.abspath(os.path.join(os.getcwd(), '..'))
-    client, model_name, api_provider = setup_llm_client(model_name="gemini-2.5-pro")
+    client, model_name, api_provider = setup_llm_client(model_name="gpt-4.1-mini")
     property_ids = get_completion(user_recommendations_prompt, client, model_name, api_provider, temperature=0.5)
     print("The LLM returned the following: {}".format(property_ids))
     property_ids = clean_llm_output(property_ids, "json")
