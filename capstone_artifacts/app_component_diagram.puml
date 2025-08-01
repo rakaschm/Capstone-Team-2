@@ -1,13 +1,13 @@
 @startuml
-' Define components
+' Component Diagram for Vacation Rental Platform
+
 component "Frontend\n(Web Browser)" as Frontend
 component "Backend API Server" as Backend
-component "LLM-based Recommendation Engine" as LLM
+component "LLM-based\nRecommendation Engine" as LLM
 database "Database" as DB
 
-' Define relationships
-Frontend -[#blue]-> Backend : HTTPS\n(View tasks,\nCreate tasks)
+Frontend -[#blue]-> Backend : HTTPS\n(User actions,\nGet recommendations)
 Backend -[#green]-> DB : Read/Write
-Backend -[#orange]-> LLM : Get property\nrecommendations
+Backend -[#orange]-> LLM : Request property\nrecommendations
 
 @enduml
