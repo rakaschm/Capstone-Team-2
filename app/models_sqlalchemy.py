@@ -43,5 +43,5 @@ class Reservation(Base):
     user = relationship("User", back_populates="reservations")
     property = relationship("Property", back_populates="reservations")
 
-Index("ix_users_email", User.email, unique=True)
+#Index("ix_users_email", User.email, unique=True)
 UniqueConstraint("email", name="uq_users_email")
