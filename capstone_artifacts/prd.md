@@ -10,7 +10,21 @@ Travelers seeking vacation rentals often struggle to find properties that are co
 - Enable users to easily reserve a recommended vacation rental property.
 - Streamline the vacation planning process by connecting activity preferences directly to rental options.
 
-## 3. User Stories
+## 3. User Personas
+
+- **Sarah, 32, Family Traveler**
+  - Needs: Wants to find family-friendly rentals near theme parks and kid-friendly attractions.
+  - Pain Points: Time-consuming search for rentals close to specific attractions.
+
+- **James, 28, Adventure Seeker**
+  - Needs: Interested in properties near hiking, biking, and water sports locations.
+  - Pain Points: Difficulty identifying rentals near adventure activities.
+
+- **Priya, 40, Culture Enthusiast**
+  - Needs: Wants a rental close to museums, historical landmarks, and local events.
+  - Pain Points: Frustration when rentals are far from desired cultural sites.
+
+## 4. User Stories
 
 1. **As a user, I want to specify a list of activities or attractions I wish to visit, so that I can receive relevant vacation rental recommendations.**
 
@@ -20,7 +34,7 @@ Travelers seeking vacation rentals often struggle to find properties that are co
 
 4. **As a user, I want to make a reservation at my selected property, so that I can secure my accommodation for my trip.**
 
-## 4. Acceptance Criteria
+## 5. Acceptance Criteria
 
 - Users can enter and submit a list of desired activities or attractions.
 - The system provides at least one vacation rental recommendation that is relevant to the user’s specified activities or attractions.
@@ -28,7 +42,7 @@ Travelers seeking vacation rentals often struggle to find properties that are co
 - Users can select a recommended property and initiate a reservation.
 - Users receive a confirmation that their reservation has been successfully made.
 
-## 5. Out of Scope
+## 6. Out of Scope
 
 - User account registration, login, or profile management.
 - Payment processing integration.
